@@ -23,7 +23,7 @@ BOOL InitializeSynchronizedQueue(SynchronizedQueue **queue)
 
 	LOG_ENTER_FUNCTION();
 
-	internal_queue = (SynchronizedQueue *)malloc(sizeof(*queue));
+	internal_queue = (SynchronizedQueue *)malloc(sizeof(*internal_queue));
 	if (internal_queue == NULL)
 	{
 		LOG_ERROR("Failed to allocate memory");
@@ -51,6 +51,8 @@ BOOL InitializeSynchronizedQueue(SynchronizedQueue **queue)
 	internal_queue->queue_mutex = queue_mutex;
 
 	*queue = internal_queue;
+
+	result = TRUE;
 
 cleanup:
 	if (!result)
@@ -179,6 +181,8 @@ cleanup:
 BOOL FreeSynchronizedQueue(SynchronizedQueue *queue)
 {
 	BOOL result = FALSE;
+
+	LOG_ENTER_FUNCTION();
 
 	if (!CloseHandle(queue->queue_mutex))
 	{

@@ -53,7 +53,7 @@ BOOL HandleParameters(
 	char *argv[],
 	char **server_ip,
 	unsigned short *server_port,
-	char **username,
+	char *username,
 	unsigned int *username_length
 );
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	SOCKET sock = INVALID_SOCKET;
 	char *server_ip;
 	unsigned short server_port;
-	char *username;
+	char username[USERNAME_MAXLENGTH + 1];
 	unsigned int username_length = 0;
 	BOOL WSAStartup_succeeded = FALSE;
 	BOOL was_login_successful = FALSE;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	LOG_INFO("client started\n");
 
 	// Handle Parameters
-	if (!HandleParameters(argc, argv, &server_ip, &server_port, &username, &username_length))
+	if (!HandleParameters(argc, argv, &server_ip, &server_port, username, &username_length))
 	{
 		error_code = WRONG_PARAMETERS;
 		goto cleanup;
@@ -154,7 +154,7 @@ BOOL HandleParameters(
 	char *argv[],
 	char **server_ip, 
 	unsigned short *server_port, 
-	char **username,
+	char *username,
 	unsigned int *username_length
 ) {
 	int atoi_result;
@@ -183,13 +183,20 @@ BOOL HandleParameters(
 	*server_port = (unsigned short)atoi_result;
 	
 	*server_ip = argv[CMD_PARAMETER_SERVER_IP];
-	*username = argv[CMD_PARAMETER_USERNAME];
-	*username_length = strnlen(*username, USERNAME_MAXLENGTH + 1);
+	*username_length = strnlen(argv[CMD_PARAMETER_USERNAME], USERNAME_MAXLENGTH + 1);
 	if (*username_length > USERNAME_MAXLENGTH)
 	{
 		LOG_ERROR("Username too long");
 		goto cleanup;
 	}
+	memset(username, '\0', USERNAME_MAXLENGTH+1);
+	if (memcpy(username, argv[CMD_PARAMETER_USERNAME], *username_length) == NULL)
+	{
+		LOG_ERROR("Failed to copy the username string");
+		goto cleanup;
+	}
+	// add the '\0' to the username
+	(*username_length)++;
 
 	result = TRUE;
 
@@ -299,7 +306,7 @@ BOOL SendQuitMessage(SOCKET server_socket)
 		&quit_message,
 		USER_MESSAGE,
 		"/quit",
-		5)
+		6)
 	) {
 		LOG_ERROR("Failed to build the login request");
 		goto cleanup;

@@ -27,21 +27,20 @@ BOOL SendMsgToDests(ClientsContainer *clients, MsgToSend *msg);
 void FreeMsgToSend(MsgToSend *msg);
 
 //--------Implementation--------//
-DWORD RunSender(SenderParams *params)
+DWORD RunSender(ClientsContainer *clients)
 {
 	SenderExitCode result = SENDER_THREAD_GENERAL_FAILURE;
 	DWORD dwWaitResult = -1;
 	BOOL retval = FALSE;
 	BOOL release_failed = FALSE;
 	BOOL is_empty = FALSE;
-	ClientsContainer *clients = NULL;
 	SynchronizedQueue *msgs_queue = NULL;
 	HANDLE send_msgs_event = INVALID_HANDLE_VALUE;
-	MsgToSend *msg;
+	MsgToSend *msg = NULL;
 
 	LOG_ENTER_FUNCTION();
 
-	if (params == NULL)
+	if (clients == NULL)
 	{
 		LOG_ERROR("Wrong parameters");
 		goto cleanup;
@@ -49,9 +48,8 @@ DWORD RunSender(SenderParams *params)
 
 	LOG_INFO("Sender thread started");
 
-	clients = params->clients;
-	msgs_queue = params->msgs_queue;
-	send_msgs_event = params->send_msgs_event;
+	msgs_queue = clients->send_queue;
+	send_msgs_event = clients->send_msgs_event;
 
 	while (TRUE)
 	{
@@ -74,7 +72,14 @@ DWORD RunSender(SenderParams *params)
 				result = SENDER_THREAD_WAIT_ERROR;
 				goto cleanup;
 			}
-			LOG_DEBUG("Send_msgs_event returned. Goinf to dequeue...");
+
+			if (clients->exit_sender)
+			{
+				result = SENDER_THREAD_TERMINATED_BY_MAIN;
+				goto cleanup;
+			}
+
+			LOG_DEBUG("Send_msgs_event returned. Going to dequeue...");
 
 		} else {
 			if (msg == NULL)
@@ -183,7 +188,7 @@ void FreeMsgToSend(MsgToSend *msg)
 	{
 		if (msg->message != NULL)
 		{
-			free(msg->message);
+			FreeChatMessage(msg->message);
 		}
 		free(msg);
 	}

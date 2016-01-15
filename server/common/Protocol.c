@@ -40,15 +40,16 @@ BOOL BuildChatMessage(ChatMessage **chat_msg, MessageType type, char *body, unsi
 	memset(internal_msg, '\0', sizeof(*internal_msg));
 
 	internal_msg->header.msg_type = type;
-	internal_msg->header.body_length = body_length;
+	internal_msg->header.body_length = htonl(body_length);
 
-	internal_msg->body = (char *)malloc(body_length + 1);
+	// body_length + 1 for the '\0'
+	internal_msg->body = (char *)malloc(body_length);
 	if (internal_msg->body == NULL)
 	{
 		LOG_ERROR("Failed to allocate memory");
 		goto cleanup;
 	}
-	memset(internal_msg->body, '\0', sizeof(body_length + 1));
+	memset(internal_msg->body, '\0', sizeof(body_length));
 
 	if (memcpy(internal_msg->body, body, body_length) == NULL)
 	{
@@ -84,6 +85,7 @@ void FreeChatMessage(ChatMessage *chat_msg)
 		if (chat_msg->body != NULL)
 		{
 			free(chat_msg->body);
+			chat_msg->body = NULL;
 		}
 		free(chat_msg);
 	}
@@ -104,10 +106,10 @@ BOOL SendChatMessage(SOCKET sock, ChatMessage *chat_msg)
 
 	LOG_DEBUG("Sending message header (type = %d, body length = %d)", 
 		chat_msg->header.msg_type, 
-		chat_msg->header.body_length
+		ntohl(chat_msg->header.body_length)
 	);
 	// Send message header
-	if (!SendBuffer((char *)&(chat_msg->header), sizeof(chat_msg->header), sock) != TRNS_SUCCEEDED)
+	if (SendBuffer((char *)&(chat_msg->header), sizeof(chat_msg->header), sock) != TRNS_SUCCEEDED)
 	{
 		LOG_ERROR("Failed to send the message header");
 		goto cleanup;
@@ -117,7 +119,7 @@ BOOL SendChatMessage(SOCKET sock, ChatMessage *chat_msg)
 	if (chat_msg->header.body_length > 0)
 	{
 		// Send message body
-		if (SendBuffer(chat_msg->body, chat_msg->header.body_length, sock) != TRNS_SUCCEEDED)
+		if (SendBuffer(chat_msg->body, ntohl(chat_msg->header.body_length), sock) != TRNS_SUCCEEDED)
 		{
 			LOG_ERROR("Failed to send the message body");
 			goto cleanup;
@@ -151,11 +153,13 @@ BOOL ReceiveChatMessage(SOCKET sock, ChatMessage **chat_msg)
 	}
 	memset(internal_msg, '\0', sizeof(*internal_msg));
 
-	if (!ReceiveBuffer((char *)&(internal_msg->header), sizeof(internal_msg->header), sock) != TRNS_SUCCEEDED)
+	if (ReceiveBuffer((char *)&(internal_msg->header), sizeof(internal_msg->header), sock) != TRNS_SUCCEEDED)
 	{
 		LOG_ERROR("Failed to receive the message header");
 		goto cleanup;
 	}
+	// Correct the endianity
+	internal_msg->header.body_length = ntohl(internal_msg->header.body_length);
 	LOG_DEBUG("Recevied message header (type = %d, body length = %d)", 
 		internal_msg->header.msg_type, 
 		internal_msg->header.body_length
@@ -169,14 +173,14 @@ BOOL ReceiveChatMessage(SOCKET sock, ChatMessage **chat_msg)
 			LOG_ERROR("malloc failed");
 			goto cleanup;
 		}
+		memset(internal_msg->body, '\0', internal_msg->header.body_length);
 
-		if (!ReceiveBuffer(internal_msg->body, internal_msg->header.body_length, sock) != TRNS_SUCCEEDED)
+		if (ReceiveBuffer(internal_msg->body, internal_msg->header.body_length, sock) != TRNS_SUCCEEDED)
 		{
 			LOG_ERROR("Failed to receive the message body");
 			goto cleanup;
 		}
 		LOG_DEBUG("Received message body - %s", internal_msg->body);
-
 	}
 
 	*chat_msg = internal_msg;

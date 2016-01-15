@@ -15,9 +15,7 @@
 
 //--------Definitions--------//
 typedef struct {
-	SynchronizedQueue *msgs_queue;
 	ClientsContainer *clients;
-	HANDLE send_msgs_event;
 } SenderParams;
 
 typedef enum {
@@ -26,13 +24,14 @@ typedef enum {
 	SENDER_THREAD_WRONG_PARAMETERS,
 	SENDER_THREAD_WAIT_ERROR,
 	SENDER_THREAD_SYNC_QUEUE_ERROR,
-	SENDER_THREAD_SEND_FAILED
+	SENDER_THREAD_SEND_FAILED,
+	SENDER_THREAD_TERMINATED_BY_MAIN
 } SenderExitCode;
 
 typedef struct {
-	char sender[USERNAME_MAXLENGTH];
+	char sender[USERNAME_MAXLENGTH+1];
 	unsigned int sender_length;
-	char dest[USERNAME_MAXLENGTH];
+	char dest[USERNAME_MAXLENGTH+1];
 	unsigned int dest_length;
 	BOOL is_broadcast;
 	ChatMessage *message;
@@ -40,7 +39,7 @@ typedef struct {
 
 //--------Declarations--------//
 // The Sender thread main function
-DWORD RunSender(SenderParams *params);
+DWORD RunSender(ClientsContainer *clients);
 
 
 #endif // __SENDER_H__

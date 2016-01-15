@@ -32,6 +32,7 @@ typedef enum {
 	ACCEPT_FAILURE,
 	MALLOC_FAILED,
 	WAIT_FOR_EVENT_FAILED,
+	SENDER_THREAD_FAILURE,
 //	CREATE_SEMAPHORE_FAILED,
 //	INTIALIZE_SERIES_FAILED,
 //	THREAD_CREATION_FAILED,
@@ -146,12 +147,16 @@ BOOL HandleThreadFinalization(
 	unsigned int client_id
 );
 
+/* Initializes the Sender thread */
+BOOL CreateSenderThread(ClientsContainer *clients);
 
 //--------Implementation--------//
 int main(int argc, char *argv[])
 {
 	SOCKET listener = INVALID_SOCKET;
 	HANDLE send_msgs_event = INVALID_HANDLE_VALUE;
+	HANDLE sender_thread_handle = INVALID_HANDLE_VALUE;
+	DWORD sender_thread_id = -1;
 	SynchronizedQueue *send_queue = NULL;
 	unsigned short listening_port;
 	unsigned int max_clients;
@@ -190,6 +195,16 @@ int main(int argc, char *argv[])
 	}
 	is_server_initialized = TRUE;
 	LOG_DEBUG("Server data structures initialized successfully");
+
+	// Initialize Sender Thread
+	sender_thread_handle = CreateThreadSimple((LPTHREAD_START_ROUTINE)RunSender, &clients, &sender_thread_id);
+	if (sender_thread_handle == NULL)
+	{
+		LOG_ERROR("failed to create thread");
+		goto cleanup;
+	}
+	LOG_INFO("Created sender thread with id %d", sender_thread_id);
+
 
 	// Initialize the listener socket
 	if (!InitializeListenerSocket(&listener, listening_port, LISTEN_QUEUE_SIZE))
@@ -233,6 +248,27 @@ int main(int argc, char *argv[])
 			}
 		}
 
+	}
+
+	// Finalize Sender Thread
+	LOG_INFO("Terminating Sender Thread");
+	//if (!TerminateThread(sender_thread_handle, SENDER_THREAD_TERMINATED_BY_MAIN))
+	//{
+	//	LOG_ERROR("Failed to finalize sender thread");
+	//	goto cleanup;
+	//}
+	clients.exit_sender = TRUE;
+	if (!SetEvent(send_msgs_event))
+	{
+		LOG_ERROR("Failed to signal sender to terminate");
+		error_code = SENDER_THREAD_FAILURE;
+		goto cleanup;
+	}
+	if (WaitForSingleObject(sender_thread_handle, INFINITE) != WAIT_OBJECT_0)
+	{
+		LOG_ERROR("Failed to wait for sender to finalize");
+		error_code = SENDER_THREAD_FAILURE;
+		goto cleanup;
 	}
 
 	LOG_INFO("Server has finalized (all the clients had disconnected)");
@@ -427,16 +463,19 @@ BOOL InitializeServer(
 		LOG_ERROR("Failed to initialize the send queue");
 		goto cleanup;
 	}
+	clients->send_queue = *send_queue;
 
 	// default security arguments
 	// reset automatically
 	// initial value - FALSE
 	*send_msgs_event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	if (send_msgs_event == NULL)
+	if (*send_msgs_event == NULL)
 	{
 		LOG_ERROR("Failed to create the send messages event");
 		goto cleanup;
 	}
+	clients->send_msgs_event = *send_msgs_event;
+	clients->exit_sender = FALSE;
 
 	result = TRUE;
 
@@ -444,7 +483,22 @@ cleanup:
 
 	if (!result)
 	{
-		// TBD
+		if (clients->clients_arr != NULL)
+		{
+			free(clients->clients_arr);
+		}
+		if (clients_mutex != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(clients_mutex);
+		}
+		if (send_msgs_event != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(send_msgs_event);
+		}
+		if (send_queue != NULL)
+		{
+			FreeSynchronizedQueue(*send_queue);
+		}
 	}
 
 	return result;
@@ -456,7 +510,6 @@ void ResetClient(Client *client)
 {
 	LOG_ENTER_FUNCTION();
 
-	LOG_DEBUG("Reseting client (previous username - %s(", client->username);
 	client->is_valid = FALSE;
 	client->client_socket = SOCKET_ERROR;
 	client->thread_handle = NULL;

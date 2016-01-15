@@ -32,8 +32,10 @@ typedef enum {
 	SYSTEM_MESSAGE_LOGIN_FAILED,
 } MessageType;
 
+#pragma pack(1)
+
 typedef struct {
-	MessageType msg_type;
+	unsigned char msg_type;
 	unsigned int body_length;
 } MessageHeader;
 
@@ -42,9 +44,11 @@ typedef struct {
 	char *body;
 } ChatMessage;
 
+#pragma pack()
+
 #define USERNAME_MAXLENGTH (16)
 #define BODY_MAXLENGTH (256)
-#define SERVER_USERNAME ("server")
+#define SERVER_USERNAME ("server\0")
 
 //--------Textual Messages Definitions--------//
 #define NO_AVAILABLE_SOCKET_MSG ("No available socket at the moment. Try again later.")

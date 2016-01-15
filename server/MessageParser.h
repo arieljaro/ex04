@@ -29,7 +29,7 @@ typedef enum {
 
 typedef struct {
 	ClientRequestType request_type;
-	char dest_user[USERNAME_MAXLENGTH];
+	char dest_user[USERNAME_MAXLENGTH+1];
 	int dest_user_length;
 	char *file_path;
 	int file_path_length;

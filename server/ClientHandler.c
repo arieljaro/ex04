@@ -117,23 +117,23 @@ BOOL HandleSuccessfulLogin(ClientsContainer *clients, Client *client)
 
 	LOG_ENTER_FUNCTION();
 	
-	welcome_msg_to_send = (MsgToSend *)malloc(sizeof(welcome_msg_to_send));
+	welcome_msg_to_send = (MsgToSend *)malloc(sizeof(*welcome_msg_to_send));
 	if (welcome_msg_to_send == NULL)
 	{
 		LOG_ERROR("Failed to allocate memory");
 		goto cleanup;
 	}
-	memset(welcome_msg_to_send, '\0', sizeof(welcome_msg_to_send));
-	user_has_joined_msg_to_send = (MsgToSend *)malloc(sizeof(user_has_joined_msg_to_send));
+	memset(welcome_msg_to_send, '\0', sizeof(*welcome_msg_to_send));
+	user_has_joined_msg_to_send = (MsgToSend *)malloc(sizeof(*user_has_joined_msg_to_send));
 	if (user_has_joined_msg_to_send == NULL)
 	{
 		LOG_ERROR("Failed to allocate memory");
 		goto cleanup;
 	}
-	memset(user_has_joined_msg_to_send, '\0', sizeof(user_has_joined_msg_to_send));
+	memset(user_has_joined_msg_to_send, '\0', sizeof(*user_has_joined_msg_to_send));
 
 	memset(welcome_message_body, '\0', BODY_MAXLENGTH);
-	memset(user_has_joined, '\0', BODY_MAXLENGTH);
+	memset(user_has_joined_body, '\0', BODY_MAXLENGTH);
 	
 	// Prepare and send welcome message
 	if (sprintf_s(welcome_message_body, BODY_MAXLENGTH, WELCOME_MSG_FMT, client->username) == -1)
@@ -145,7 +145,7 @@ BOOL HandleSuccessfulLogin(ClientsContainer *clients, Client *client)
 		&welcome_message,
 		SYSTEM_MESSAGE,
 		welcome_message_body,
-		strlen(welcome_message_body))
+		strlen(welcome_message_body)+1)
 	) {
 		LOG_ERROR("Failed to build the login failed response");
 		goto cleanup;
@@ -182,7 +182,7 @@ BOOL HandleSuccessfulLogin(ClientsContainer *clients, Client *client)
 		&user_has_joined,
 		SYSTEM_MESSAGE,
 		user_has_joined_body,
-		strlen(user_has_joined_body))
+		strlen(user_has_joined_body)+1)
 	) {
 		LOG_ERROR("Failed to build the login failed response");
 		goto cleanup;
@@ -277,6 +277,16 @@ BOOL HandleQuitCommand(ClientsContainer *clients, Client *client)
 	
 	LOG_ENTER_FUNCTION();
 
+	user_has_left_msg_to_send = (MsgToSend *)malloc(sizeof(*user_has_left_msg_to_send));
+	if (user_has_left_msg_to_send == NULL)
+	{
+		LOG_ERROR("Failed to allocate memory");
+		goto cleanup;
+	}
+	memset(user_has_left_msg_to_send, '\0', sizeof(*user_has_left_msg_to_send));
+
+	memset(user_has_left_body, '\0', BODY_MAXLENGTH);
+
 	// Prepare and send user has left message
 	if (sprintf_s(user_has_left_body, BODY_MAXLENGTH, USER_HAS_LEFT_FMT, client->username) == -1)
 	{
@@ -287,7 +297,7 @@ BOOL HandleQuitCommand(ClientsContainer *clients, Client *client)
 		&user_has_left,
 		SYSTEM_MESSAGE,
 		user_has_left_body,
-		strlen(user_has_left_body))
+		strlen(user_has_left_body)+1)
 	) {
 		LOG_ERROR("Failed to build the login failed response");
 		goto cleanup;

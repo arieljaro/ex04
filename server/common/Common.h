@@ -33,7 +33,7 @@
 #endif
 
 #ifdef _LOG_ERROR
-#define LOG_ERROR(msg, ...) fprintf(stderr, "[ERROR] (%d:%s:%d) - " msg "\r\n", GetCurrentThreadId(), __FILE__, __LINE__, ##__VA_ARGS__)
+#define LOG_ERROR(msg, ...) fprintf(stderr, "[ERROR  ] (%d:%s:%d) - " msg "\r\n", GetCurrentThreadId(), __FILE__, __LINE__, ##__VA_ARGS__)
 #else
 #define LOG_ERROR(msg, ...)
 #endif
@@ -45,13 +45,13 @@
 #endif
 
 #ifdef _LOG_INFO
-#define LOG_INFO(msg, ...) fprintf(stderr, "[INFO] (%d:%s:%d) - " msg "\r\n", GetCurrentThreadId(), __FILE__, __LINE__, ##__VA_ARGS__)
+#define LOG_INFO(msg, ...) fprintf(stderr, "[INFO   ] (%d:%s:%d) - " msg "\r\n", GetCurrentThreadId(), __FILE__, __LINE__, ##__VA_ARGS__)
 #else
 #define LOG_INFO(msg, ...)
 #endif
 
 #ifdef _LOG_DEBUG
-#define LOG_DEBUG(msg, ...) fprintf(stderr, "[INFO] (%d:%s:%d) - " msg "\r\n", GetCurrentThreadId(), __FILE__, __LINE__, ##__VA_ARGS__)
+#define LOG_DEBUG(msg, ...) fprintf(stderr, "[DEBUG  ] (%d:%s:%d) - " msg "\r\n", GetCurrentThreadId(), __FILE__, __LINE__, ##__VA_ARGS__)
 #else
 #define LOG_DEBUG(msg, ...)
 #endif

@@ -205,6 +205,10 @@ BOOL ParseMessage(ChatMessage *chat_msg, ParsedMessage **parsed_msg_param)
 	parsed_msg->request_type = req_type;
 	parsed_msg->is_broadcast = is_broadcast;
 	parsed_msg->dest_user_length = user_length;
+	if (parsed_msg->dest_user_length == -1)
+	{
+		memset(&(parsed_msg->dest_user), '\0', USERNAME_MAXLENGTH+1);
+	}
 
 	if ((req_type == REQ_BROADCAST_FILE) || (req_type == REQ_P2P_MESSAGE))
 	{
@@ -220,6 +224,7 @@ BOOL ParseMessage(ChatMessage *chat_msg, ParsedMessage **parsed_msg_param)
 		parsed_msg->file_path_length = -1;
 		parsed_msg->file_path = NULL;
 	}
+
 	LOG_DEBUG("Parsed message details: req_type = %d, is_broadcast = %d", 
 		parsed_msg->request_type, parsed_msg->is_broadcast);
 	LOG_DEBUG("Parsed message details: dest_user_length = %d, dest_user = %s",

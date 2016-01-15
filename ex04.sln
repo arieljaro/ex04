@@ -7,14 +7,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server", "server\server.vcx
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		client|Win32 = client|Win32
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.client|Win32.ActiveCfg = client|Win32
+		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.client|Win32.Build.0 = client|Win32
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Debug|Win32.ActiveCfg = Debug|Win32
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Debug|Win32.Build.0 = Debug|Win32
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Release|Win32.ActiveCfg = Release|Win32
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Release|Win32.Build.0 = Release|Win32
+		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.client|Win32.ActiveCfg = client|Win32
+		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.client|Win32.Build.0 = client|Win32
 		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Debug|Win32.ActiveCfg = Debug|Win32
 		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Debug|Win32.Build.0 = Debug|Win32
 		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Release|Win32.ActiveCfg = Release|Win32

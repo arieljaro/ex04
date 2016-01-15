@@ -33,6 +33,7 @@ typedef struct {
 	HANDLE clients_mutex;
 	SynchronizedQueue *send_queue;
 	HANDLE send_msgs_event;
+	volatile BOOL exit_sender;
 } ClientsContainer;
 
 typedef struct {
