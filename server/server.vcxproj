@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{15F74675-18C2-44C8-8436-C2A6782BC0BC}</ProjectGuid>
+    <ProjectGuid>{3326EA36-7F2A-4116-BA20-56E66CB814D3}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>ex04</RootNamespace>
+    <RootNamespace>server</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,9 +39,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\ariel\Repositories\ex04\server;$(IncludePath)</IncludePath>
-    <SourcePath>$(SourcePath)</SourcePath>
-    <ReferencePath>C:\Users\ariel\Repositories\ex04\common;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -77,18 +74,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\server\common\LinkedList.c" />
-    <ClCompile Include="..\server\common\Protocol.c" />
-    <ClCompile Include="..\server\common\SimpleWinAPI.c" />
-    <ClCompile Include="..\server\common\SocketSendRecvTools.c" />
-    <ClCompile Include="..\server\common\SynchronizedQueue.c" />
-    <ClCompile Include="client.c" />
-    <ClCompile Include="ClientLog.c" />
-    <ClCompile Include="SocketReader.c" />
+    <ClCompile Include="ClientHandler.c" />
+    <ClCompile Include="common\LinkedList.c" />
+    <ClCompile Include="common\Protocol.c" />
+    <ClCompile Include="common\SimpleWinAPI.c" />
+    <ClCompile Include="common\SocketSendRecvTools.c" />
+    <ClCompile Include="common\SynchronizedQueue.c" />
+    <ClCompile Include="MessageParser.c" />
+    <ClCompile Include="Sender.c" />
+    <ClCompile Include="server.c" />
+    <ClCompile Include="ServerLog.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClientLog.h" />
-    <ClInclude Include="SocketReader.h" />
+    <ClInclude Include="ClientHandler.h" />
+    <ClInclude Include="common\common.h" />
+    <ClInclude Include="common\LinkedList.h" />
+    <ClInclude Include="common\protocol.h" />
+    <ClInclude Include="common\SimpleWinAPI.h" />
+    <ClInclude Include="common\SocketSendRecvTools.h" />
+    <ClInclude Include="common\SynchronizedQueue.h" />
+    <ClInclude Include="MessageParser.h" />
+    <ClInclude Include="Sender.h" />
+    <ClInclude Include="ServerLog.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -7,5 +7,42 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{506084ac-99c1-44a6-abab-2ebc7bc20857}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common">
+      <UniqueIdentifier>{7c498808-9951-4ce0-90da-f88b2c838301}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="client.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\server\common\SimpleWinAPI.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="SocketReader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\server\common\SocketSendRecvTools.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\server\common\LinkedList.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\server\common\SynchronizedQueue.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\server\common\Protocol.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientLog.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="SocketReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

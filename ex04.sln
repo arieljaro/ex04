@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "client", "client\client.vcxproj", "{15F74675-18C2-44C8-8436-C2A6782BC0BC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server", "server\server.vcxproj", "{3326EA36-7F2A-4116-BA20-56E66CB814D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Debug|Win32.Build.0 = Debug|Win32
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Release|Win32.ActiveCfg = Release|Win32
 		{15F74675-18C2-44C8-8436-C2A6782BC0BC}.Release|Win32.Build.0 = Release|Win32
+		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Debug|Win32.Build.0 = Debug|Win32
+		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Release|Win32.ActiveCfg = Release|Win32
+		{3326EA36-7F2A-4116-BA20-56E66CB814D3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
