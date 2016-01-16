@@ -80,11 +80,11 @@
   <ItemGroup>
     <ClCompile Include="ClientHandler.c" />
     <ClCompile Include="common\LinkedList.c" />
+    <ClCompile Include="common\MessageParser.c" />
     <ClCompile Include="common\Protocol.c" />
     <ClCompile Include="common\SimpleWinAPI.c" />
     <ClCompile Include="common\SocketSendRecvTools.c" />
     <ClCompile Include="common\SynchronizedQueue.c" />
-    <ClCompile Include="MessageParser.c" />
     <ClCompile Include="Sender.c" />
     <ClCompile Include="server.c" />
     <ClCompile Include="ServerLog.c" />
@@ -93,11 +93,11 @@
     <ClInclude Include="ClientHandler.h" />
     <ClInclude Include="common\common.h" />
     <ClInclude Include="common\LinkedList.h" />
+    <ClInclude Include="common\MessageParser.h" />
     <ClInclude Include="common\protocol.h" />
     <ClInclude Include="common\SimpleWinAPI.h" />
     <ClInclude Include="common\SocketSendRecvTools.h" />
     <ClInclude Include="common\SynchronizedQueue.h" />
-    <ClInclude Include="MessageParser.h" />
     <ClInclude Include="Sender.h" />
     <ClInclude Include="ServerLog.h" />
   </ItemGroup>

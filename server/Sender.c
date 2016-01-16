@@ -10,7 +10,7 @@
 
 //--------Project Includes--------//
 #include "Sender.h"
-#include "MessageParser.h"
+#include "common\MessageParser.h"
 #include "common\SocketSendRecvTools.h"
 
 //--------Definitions--------//
@@ -22,9 +22,6 @@
 //--------Declarations--------//
 // Sends a message to the msg destinations (single user / broadcast)
 BOOL SendMsgToDests(ClientsContainer *clients, MsgToSend *msg);
-
-// Free MsgToSend structure (and the ChatMessage inside it)
-void FreeMsgToSend(MsgToSend *msg);
 
 //--------Implementation--------//
 DWORD RunSender(ClientsContainer *clients)

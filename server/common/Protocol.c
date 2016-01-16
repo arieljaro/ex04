@@ -135,6 +135,10 @@ cleanup:
 
 BOOL ReceiveChatMessage(SOCKET sock, ChatMessage **chat_msg) 
 {
+	/**********************************************/
+	/* TBD - HANDLE SOCKET CLOSE */
+	/**********************************************/
+
 	ChatMessage *internal_msg = NULL;
 	BOOL result = FALSE;
 

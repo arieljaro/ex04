@@ -10,8 +10,8 @@
 
 
 //--------Project Includes--------//
-#include "common\Protocol.h"
-#include "common\Common.h"
+#include "Protocol.h"
+#include "Common.h"
 
 //--------Definitions--------//
 typedef enum {

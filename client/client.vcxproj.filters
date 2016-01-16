@@ -36,12 +36,24 @@
     <ClCompile Include="ClientLog.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConsoleReader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\server\common\MessageParser.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SocketReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ClientLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

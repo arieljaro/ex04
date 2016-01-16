@@ -47,7 +47,9 @@ typedef struct {
 #pragma pack()
 
 #define USERNAME_MAXLENGTH (16)
-#define BODY_MAXLENGTH (256)
+#define MESSAGE_OVERHEAD_MAXLENGTH (256)
+#define MESSAGE_MAXLENGTH (356)
+#define BODY_MAXLENGTH (MESSAGE_MAXLENGTH + MESSAGE_OVERHEAD_MAXLENGTH)
 #define SERVER_USERNAME ("server\0")
 
 //--------Textual Messages Definitions--------//

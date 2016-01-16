@@ -11,7 +11,7 @@
 //--------Project Includes--------//
 #include "common\SynchronizedQueue.h"
 #include "ClientHandler.h"
-#include "MessageParser.h"
+#include "common\MessageParser.h"
 
 //--------Definitions--------//
 typedef struct {
@@ -41,5 +41,7 @@ typedef struct {
 // The Sender thread main function
 DWORD RunSender(ClientsContainer *clients);
 
+// Free MsgToSend structure (and the ChatMessage inside it)
+void FreeMsgToSend(MsgToSend *msg);
 
 #endif // __SENDER_H__

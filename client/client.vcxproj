@@ -82,16 +82,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\server\common\LinkedList.c" />
+    <ClCompile Include="..\server\common\MessageParser.c" />
     <ClCompile Include="..\server\common\Protocol.c" />
     <ClCompile Include="..\server\common\SimpleWinAPI.c" />
     <ClCompile Include="..\server\common\SocketSendRecvTools.c" />
     <ClCompile Include="..\server\common\SynchronizedQueue.c" />
     <ClCompile Include="client.c" />
     <ClCompile Include="ClientLog.c" />
+    <ClCompile Include="ConsoleReader.c" />
     <ClCompile Include="SocketReader.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ClientCommon.h" />
     <ClInclude Include="ClientLog.h" />
+    <ClInclude Include="ConsoleReader.h" />
     <ClInclude Include="SocketReader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

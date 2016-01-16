@@ -30,9 +30,6 @@
     <ClInclude Include="common\SimpleWinAPI.h">
       <Filter>Header Files\common</Filter>
     </ClInclude>
-    <ClInclude Include="MessageParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ClientHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -51,6 +48,9 @@
     <ClInclude Include="Sender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\MessageParser.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="server.c">
@@ -58,9 +58,6 @@
     </ClCompile>
     <ClCompile Include="common\SimpleWinAPI.c">
       <Filter>Source Files\common</Filter>
-    </ClCompile>
-    <ClCompile Include="MessageParser.c">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ClientHandler.c">
       <Filter>Source Files</Filter>
@@ -81,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="common\Protocol.c">
+      <Filter>Source Files\common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\MessageParser.c">
       <Filter>Source Files\common</Filter>
     </ClCompile>
   </ItemGroup>

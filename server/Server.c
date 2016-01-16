@@ -14,8 +14,8 @@
 
 //--------Project Includes--------//
 #include "ClientHandler.h"
-#include "MessageParser.h"
 #include "Sender.h"
+#include "common\MessageParser.h"
 #include "common\SocketSendRecvTools.h"
 #include "common\common.h"
 #include "common\SimpleWinAPI.h"
@@ -33,9 +33,7 @@ typedef enum {
 	MALLOC_FAILED,
 	WAIT_FOR_EVENT_FAILED,
 	SENDER_THREAD_FAILURE,
-//	CREATE_SEMAPHORE_FAILED,
-//	INTIALIZE_SERIES_FAILED,
-//	THREAD_CREATION_FAILED,
+	THREAD_CREATION_FAILED,
 	THREAD_RUN_FAILED,
 } ServerErrorCode;
 
@@ -201,10 +199,10 @@ int main(int argc, char *argv[])
 	if (sender_thread_handle == NULL)
 	{
 		LOG_ERROR("failed to create thread");
+		error_code = THREAD_CREATION_FAILED;
 		goto cleanup;
 	}
 	LOG_INFO("Created sender thread with id %d", sender_thread_id);
-
 
 	// Initialize the listener socket
 	if (!InitializeListenerSocket(&listener, listening_port, LISTEN_QUEUE_SIZE))

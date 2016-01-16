@@ -8,7 +8,7 @@
 
 //--------Project Includes--------//
 #include "MessageParser.h"
-#include "common\Common.h"
+#include "Common.h"
 
 //--------Definitions--------//
 // larger than max command (so that never will take a string that is not a command as a command)

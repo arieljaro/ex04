@@ -12,6 +12,10 @@
 #pragma comment(lib, "ws2_32.lib")
 
 //--------Project Includes--------//
+#include "SocketReader.h"
+#include "ConsoleReader.h"
+#include "ClientLog.h"
+#include "ClientCommon.h"
 #include "common\common.h"
 #include "common\SimpleWinAPI.h"
 #include "common\Protocol.h"
@@ -27,9 +31,8 @@ typedef enum {
 	WAIT_FOR_EVENT_FAILED,
 	CONNECTION_FAILURE,
 	LOGIN_FAILURE,
-//	CREATE_SEMAPHORE_FAILED,
-//	INTIALIZE_SERIES_FAILED,
-//	THREAD_CREATION_FAILED,
+	LOG_FILE_FAILURE,
+	THREAD_CREATION_FAILED,
 	THREAD_RUN_FAILED,
 } ClientErrorCode;
 
@@ -40,6 +43,11 @@ typedef enum {
 	CMD_PARAMETERS_NUM
 } ClientCmdParameter;
 
+typedef enum {
+	SOCKET_READER_THREAD = 0,
+	CONSOLE_READER_THREAD,
+	WAIT_OBJECTS_NUM
+} WaitObjects;
 
 //--------Global Variables---------//
 
@@ -70,16 +78,31 @@ BOOL Login(SOCKET server_socket, char *username, unsigned int username_length, B
 
 BOOL SendQuitMessage(SOCKET server_socket);
 
+/* Read messages from console and sends them (handling file sendings also).
+ * Exits upon sending quit message or on failure.
+ * Returns of TRUE on success and FALSE otherwise.
+ */
+BOOL HandleConsoleMessages(SOCKET sock, ClientLog *log);
+
+BOOL WaitForThreadsTermination(HANDLE socket_reader_thread_handle, HANDLE console_reader_thread_handle);
+
 //--------Implementation--------//
 int main(int argc, char *argv[])
 {
-	SOCKET sock = INVALID_SOCKET;
 	char *server_ip;
 	unsigned short server_port;
 	char username[USERNAME_MAXLENGTH + 1];
 	unsigned int username_length = 0;
+	ClientLog log;
+	SOCKET sock = INVALID_SOCKET;
+	ClientObject client_object;
+	HANDLE socket_reader_thread_handle = INVALID_HANDLE_VALUE;
+	DWORD socket_reader_thread_id = -1;
+	HANDLE console_reader_thread_handle = INVALID_HANDLE_VALUE;
+	DWORD console_reader_thread_id = -1;
 	BOOL WSAStartup_succeeded = FALSE;
 	BOOL was_login_successful = FALSE;
+	BOOL is_log_initialized = FALSE;
 	ClientErrorCode error_code = GENERAL_FAILURE;
 	
 	LOG_INFO("client started\n");
@@ -90,8 +113,15 @@ int main(int argc, char *argv[])
 		error_code = WRONG_PARAMETERS;
 		goto cleanup;
 	}
-
 	LOG_INFO("Client Parameters: Server IP = %s, Server Port = %d, username = %s", server_ip, server_port, username);
+
+	if (!InitializeClientLog(&log, username, username_length))
+	{
+		LOG_ERROR("Failed to initialize the client's log");
+		error_code = LOG_FILE_FAILURE;
+		goto cleanup;
+	}
+	is_log_initialized = TRUE;
 
 	// Initialize WinSock2
 	if (!InitializeWinSock2())
@@ -115,20 +145,60 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-	LOG_INFO("Sleeping....");
-	Sleep(10 * 1000);
-
-	// TBD - remove this
-	LOG_INFO("Quitting (just for debugging - should be removed");
-	if (!SendQuitMessage(sock))
+	if (!was_login_successful)
 	{
-		LOG_ERROR("Failed to send the quit message");
+		error_code = LOGIN_FAILURE;
 		goto cleanup;
 	}
+
+	// Prepare client object
+	client_object.sock = sock;
+	client_object.log = &log;
+
+	// Start socket reader thread
+	socket_reader_thread_handle = CreateThreadSimple((LPTHREAD_START_ROUTINE)RunSocketReader, &client_object, &socket_reader_thread_id);
+	if (socket_reader_thread_handle == NULL)
+	{
+		LOG_ERROR("failed to create socket reader thread");
+		error_code = THREAD_CREATION_FAILED;
+		goto cleanup;
+	}
+	LOG_INFO("Created socket reader thread with id %d", socket_reader_thread_id);
+
+	// Wait for console messages to send
+	console_reader_thread_handle = CreateThreadSimple((LPTHREAD_START_ROUTINE)RunConsoleReader, &client_object, &console_reader_thread_id);
+	if (console_reader_thread_handle == NULL)
+	{
+		LOG_ERROR("failed to create console reader thread");
+		error_code = THREAD_CREATION_FAILED;
+		goto cleanup;
+	}
+	LOG_INFO("Created console reader thread with id %d", console_reader_thread_id);
+
+	if (!WaitForThreadsTermination(socket_reader_thread_handle, console_reader_thread_handle))
+	{
+		LOG_ERROR("Wait for thread termination failure");
+		error_code = WAIT_FOR_EVENT_FAILED;
+		goto cleanup;
+	}
+	socket_reader_thread_handle = INVALID_HANDLE_VALUE;
+	console_reader_thread_handle = INVALID_HANDLE_VALUE;
 
 	error_code = SUCCESS;
 
 cleanup:
+	if (socket_reader_thread_handle != INVALID_HANDLE_VALUE)
+	{
+		LOG_WARN("Terminating socket reader thread");
+		TerminateThread(socket_reader_thread_handle, THREAD_TERMINATED_BY_MAIN);
+	}
+	
+	if (console_reader_thread_handle != INVALID_HANDLE_VALUE)
+	{
+		LOG_WARN("Terminating console reader thread");
+		TerminateThread(console_reader_thread_handle, THREAD_TERMINATED_BY_MAIN);
+	}
+
 	if (sock != INVALID_SOCKET)
 	{
 		if (closesocket(sock) == SOCKET_ERROR)
@@ -143,6 +213,11 @@ cleanup:
 		{
 			LOG_ERROR("Failed to Cleanup WSA2 - error number %ld", WSAGetLastError());
 		}
+	}
+
+	if (is_log_initialized)
+	{
+		CloseClientLog(&log);
 	}
 
 	LOG_INFO("Client is exiting with error code %d", error_code);
@@ -322,5 +397,65 @@ BOOL SendQuitMessage(SOCKET server_socket)
 	
 cleanup:
 	FreeChatMessage(quit_message);
+	return result;
+}
+
+BOOL WaitForThreadsTermination(HANDLE socket_reader_thread_handle, HANDLE console_reader_thread_handle)
+{
+	BOOL result = FALSE;
+	HANDLE waiting_objects_array[WAIT_OBJECTS_NUM];
+	DWORD wait_result = WAIT_FAILED;
+	DWORD thread_exit_code = -1;
+	DWORD thread_id = -1;
+	HANDLE thread_handle = INVALID_HANDLE_VALUE;
+	unsigned int signaled_object = MAXIMUM_WAIT_OBJECTS;
+	int i = 0;
+
+	// Prepare the waiting objects array and wait for the thread finalizations
+	waiting_objects_array[SOCKET_READER_THREAD] = socket_reader_thread_handle;
+	waiting_objects_array[CONSOLE_READER_THREAD] = console_reader_thread_handle;
+	wait_result = WaitForMultipleObjects(WAIT_OBJECTS_NUM, waiting_objects_array, FALSE, INFINITE);
+	if ((wait_result < WAIT_OBJECT_0) || (wait_result >= (WAIT_OBJECT_0 + WAIT_OBJECTS_NUM)))
+	{
+		LOG_ERROR("WaitForMultipleObjects failed. Error number %ld", WSAGetLastError());
+		goto cleanup;
+	}
+
+	// Search for signaled thread. When one of the has signaled, terminate the others.
+	signaled_object  = wait_result - WAIT_OBJECT_0;
+	for (i = 0; i < WAIT_OBJECTS_NUM; i++)
+	{
+		thread_handle = waiting_objects_array[i];
+		thread_id = GetThreadId(thread_handle);
+		if (i == signaled_object)
+		{
+			//get the thread's exit code
+			if (!GetExitCodeThread(thread_handle, &thread_exit_code))
+			{
+				LOG_ERROR("Failed to get thread (id=%d) exit code - Error number %ld", thread_id, WSAGetLastError());
+				goto cleanup;
+			}
+			LOG_INFO("Thread (id=%d) returned with exit code %d (0=success)", thread_id, thread_exit_code);
+
+			if(thread_exit_code != THREAD_SUCCESS)
+			{
+				LOG_ERROR("Thread (id=%d) failed", thread_id);
+				goto cleanup;
+			}
+		} else {
+			if (!TerminateThread(thread_handle, THREAD_TERMINATED_BY_MAIN))
+			{
+				LOG_ERROR("Failed to terminate thread with id %d", thread_id);
+				goto cleanup;
+			}
+		}
+
+		// anyway close handle
+		CloseHandle(thread_handle);
+	}
+
+	result = TRUE;
+
+cleanup:
 	return result;
 }
